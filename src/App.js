@@ -1,8 +1,16 @@
 import React, { Component } from "react";
 import "./App.css";
 import Web3 from 'web3';
+import GameEngine from './GameEngine';
+import ERC721MintableBurnableImpl from './ERC721MintableBurnableImpl';
 
-
+let currentTokenId = 1
+async function createAndApproveToken(token, tokenId, gameContractAddress, beneficiaryAddress, approversAddress) {
+  console.log("token", token)
+  await token.methods.mint(beneficiaryAddress, tokenId).send( {from: approversAddress,
+    inputs: beneficiaryAddress, tokenId});
+  // await token.methods.approve(gameContractAddress, tokenId, {from: beneficiaryAddress});
+}
 
 
 class App extends Component {
@@ -28,6 +36,25 @@ class App extends Component {
       this.setState({ accounts, isEmptyAccounstArray });
     }
   }
+  
+  getERC721MintableBurnableImplToken = async () => {
+    const amount = 1
+    const otherAccount = '0x2f4cE4f714C68A3fC871d1f543FFC24b9b3c2386'
+    await ERC721MintableBurnableImpl.methods.mint(this.state.accounts[0], 1 ).send({
+      from : this.state.accounts[0],
+      inputs : [this.state.accounts[0], amount]
+    })
+  }
+
+
+  // playGame = async event => {
+  //   await GameEngine.methods.play("0xace8248a9198cc0cb0fd30d9e50e2256e3ceb577", 100).send({
+  //     from: this.state.accounts[0],
+  //     inputs: ["0xace8248a9198cc0cb0fd30d9e50e2256e3ceb577", 100]
+  //   }).then((result)=>(console.log(result)));
+  //   console.log("done")
+  // }
+
 
   render() {
     return (
@@ -42,9 +69,10 @@ class App extends Component {
         </ul>
         <p>If it does not perform as expected in any of the scenarios above let me know. I will also test on mist etc in the future.</p>
         {this.state.noMetatMask && <h1>Please Install MetaMask</h1>}
-        {this.state.hasMetaMask && <h1>Has Meta Mask
+        {this.state.hasMetaMask && <h1>Has Meta Mask 👉 click to get accounts
           <button onClick={this.requestMetaMaskInfo} >Click</button>
         </h1>}
+        {this.state.hasMetaMask && this.state.accounts &&<h1>Click to get a mintable &amp burnable token to play with <button onClick={this.getERC721MintableBurnableImplToken}>GET ERC721</button></h1>}
         {this.state.accounts && <h2>{this.state.accounts}</h2>}
         {this.state.isEmptyAccounstArray && <p>You might need to login to MetaMask and try again</p>}
       </div>
